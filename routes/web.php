@@ -1,141 +1,88 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\RecyclingController;
-use App\Http\Controllers\CoinController;
-use App\Http\Controllers\DropOffLocationController;
-use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RecyclingController;
 
-//halaman public !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//kl slash doang tampilin welcome, kl kita tr makenya landing page
-Route::get('/', [ProductController::class, 'landing'])
-    ->name('landing');
+Route::get('/', function () {
+    return view('welcome');
+});
 
-//hlman product!!! list produk
-Route::get('/produk', [ProductController::class, 'index'])
-    ->name('produk.index');
-
-//hlmn detail produk
-Route::get('/produk/{id}', [ProductController::class, 'show'])
-    ->name('produk.show');
-
-//hlmn drop off lokasi
-Route::get('/lokasi-dropoff', [DropOffLocationController::class, 'index'])
-    ->name('lokasi-dropoff.index');
-
-
-//hal loginn butuh middleware!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//bwat midle ware mangggil grup funkzi
-Route::middleware(['auth', 'verified'])->group(function() {
-    
-    //hal dashboardd
-    Route::get('/dashboard', [DashboardController::class, 'index'])
+Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
     ->name('dashboard');
-
-    //hal profile
-    //edit
-    Route::get('/profile', [ProfileController::class, 'edit'])
-    ->name('profile.edit');
-    //update
-    Route::patch('/profile', [ProfileController::class, 'update'])
-    ->name('profile.update');
-    //delete
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-    ->name('profile.destroy');
-
-    //hal produk
-    //jual produk or upload
-    Route::get('/produk/jual', [ProductController::class, 'create'])
-    ->name('product.create');
-    //simpen produk
-    Route::post('/produk', [ProductController::class, 'store'])
-    ->name('produk.store');
-    //apus
-    Route::delete('/produk/{id}', [ProductController::class, 'destroy'])
-    ->name('produk.destroy');
-
-    //hal krnjang MAU BOBOKKKKK
-    //ini buat liat keranjnag kan?
-    Route::get('/keranjang', [CartController::class, 'index'])
-    ->name('keranjang.index');
-    //simpen keranjank
-    Route::post('/keranjang', [CartController::class, 'store'])
-    ->name('keranjang.store');
-    //bom keranjnag
-    Route::delete('/keranjang/{id}', [CartController::class, 'destroy'])
-    ->name('keranjang.destroy');
-
-    //hal order pesan shibaw
-    //ini buat liat pesanan ad p je
-    Route::get('/pesanan', [OrderController::class, 'index'])
-    ->name('pesanan.index');
-    //ini buat nyimpen d p aj
-    Route::post('/pesanan', [OrderController::class, 'store'])
-    ->name('pesanan.store');
-    //ini buat liat detil pesanan nyh
-    Route::get('/pesanan/{id}', [OrderController::class, 'show'])
-    ->name('pesanan.show');
-    //ni update pesanan kau ynk linglung
-    Route::patch('/pesanan/{id}', [OrderController::class, 'update'])
-    ->name('pesanan.update');
-
-    //RECYCLE BYCICLE HAHH
-    //liat daur ulank kau ada kau tdk
-    Route::get('/daur-ulang', [RecyclingController::class, 'index'])
-    ->name('daur-ulang.index');
-    //daur ulang form BUAT APE NI????
-    Route::get('/daur-ulang/form', [RecyclingController::class, 'create'])
-    ->name('daur-ulang.create');
-    //simpen
-    Route::post('/daur-ulang', [RecyclingController::class, 'store'])
-    ->name('daur-ulang.store');
-    //scan shibaw
-    Route::post('/daur-ulang/scan', [RecyclingController::class, 'scan'])
-    ->name('daur-ulang.scan');
-
-    //halanman koinzz
-    //liat koin elu
-    Route::get('/koin', [CoinController::class, 'index'])
-    ->name('koin.index');
-
-});
-
-//halamn adminzzzzzzzzzzzz !!!!!!!!!!!!!!!!!!!!!!!!
-Route::middleware(['auth'])->prefix('admin')->group(function() {
-
-    //dashboard
-    Route::get('/dashboard', [AdminController::class, 'index'])
-    ->name('admin.dashboard');
-    //liat dropoff
-    Route::get('/lokasi-dropoff', [AdminController::class, 'dropoffIndex'])
-    ->name('admin.dropoff.index');
-    //simpen
-    Route::post('/lokasi-dropoff', [AdminController::class, 'dropoffStore'])
-    ->name('admin.dropoff.store');
-    //update
-    Route::get('/lokasi-dropoff', [AdminController::class, 'konfirmasiDaurUlang'])
-    ->name('admin.daur-ulang.konfirmasi');
-
-});
-
-//API INTERNAL INTEGRATION KOIN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-Route::prefix('api')->group(function(){
     
-    //tambah koin
-    Route::post('/koin/tambah', [CoinController::class, 'tambahKoin'])
-    ->name('api.koin.tambah');
-    //kurangi ckoin
-    Route::post('/koin/kurang', [CoinController::class, 'kurangKoin'])
-    ->name('api.koin.kurang');
-    //zek zaldo
-    Route::get('/koin/{user_id}', [CoinController::class, 'cekSaldo'])
-    ->name('api.koin.saldo');
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/profil', function () {
+    return view('profile.index');
+})->middleware(['auth'])->name('profil');
 
+Route::get('/ayu-belanja', function () {
+    return view('ayu-belanja');
+})->middleware(['auth'])->name('ayu-belanja');
+
+Route::get('/ayu-daur-ulang', function () {
+    return view('ayu-daur-ulang');
+})->middleware(['auth'])->name('ayu-daur-ulang');
+
+Route::get('/dropoff-lokasi', function () {
+    return view('dropoff-lokasi');
+})->middleware(['auth'])->name('dropoff-lokasi');
+
+Route::get('/keranjang', function () {
+    return view('keranjang');
+})->middleware(['auth'])->name('keranjang');
+
+Route::get('/notifikasi', function () {
+    return view('notifikasi');
+})->middleware(['auth'])->name('notifikasi');
+
+Route::get('/scan-kemasan', function () {
+    return view('scan-kemasan');
+})->middleware(['auth'])->name('scan-kemasan');
+
+Route::get('/detail-produk', function () {
+    return view('detail-produk');
+})->middleware(['auth'])->name('detail-produk');
+
+Route::get('/checkout', function () {
+    return view('checkout');
+})->middleware(['auth'])->name('checkout');
+
+Route::get('/chat-penjual', function () {
+    return view('chat-penjual');
+})->middleware(['auth'])->name('chat-penjual');
+
+Route::get('/ayu-koin', function () {
+    return view('ayu-koin');
+})->middleware(['auth'])->name('ayu-koin');
+
+Route::get('/pesanan-berhasil', function () {
+    return view('pesanan-berhasil');
+})->middleware(['auth'])->name('pesanan-berhasil');
+
+Route::get('/pesanan-saya', function () {
+    return view('pesanan-saya');
+})->middleware(['auth'])->name('pesanan-saya');
+
+Route::get('/detail-pesanan', function () {
+    return view('detail-pesanan');
+})->middleware(['auth'])->name('detail-pesanan');
+
+Route::get('/lacak-pesanan', function () {
+    return view('lacak-pesanan');
+})->middleware(['auth'])->name('lacak-pesanan');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/scan-kemasan', [RecyclingController::class, 'index'])->name('scan-kemasan');
+    Route::post('/scan-kemasan/upload', [RecyclingController::class, 'uploadFoto'])->name('upload-foto');
+    Route::get('/scan-qr', [RecyclingController::class, 'scanQR'])->name('scan-qr');
+    Route::post('/scan-qr/proses', [RecyclingController::class, 'prosesQR'])->name('proses-qr');
+    Route::get('/daur-ulang-sukses', [RecyclingController::class, 'sukses'])->name('daur-ulang-sukses');
+});
 require __DIR__.'/auth.php';
