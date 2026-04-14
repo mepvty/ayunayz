@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Checkout - AYU-NE</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -228,11 +229,12 @@
                 <span>Total</span>
                 <span id="totalVal">Rp 185.000</span>
             </div>
-            <a href="{{ route('pesanan-berhasil') }}" class="btn-pesan" style="display:block; text-align:center; text-decoration:none;">Buat Pesanan</a>
+            <button id="pay-button" class="btn-pesan" style="display:block; text-align:center; width:100%;">Buat Pesanan</button>
         </div>
     </div>
 </div>
 
+<script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
     let ongkir = 15000;
     const subtotal = 170000;
@@ -252,6 +254,50 @@
         document.getElementById('ongkirVal').textContent = formatRp(ongkir);
         document.getElementById('totalVal').textContent = formatRp(subtotal + ongkir);
     }
+
+    // Midtrans Snap Payment
+    document.getElementById('pay-button').onclick = function () {
+        const total = subtotal + ongkir;
+
+        fetch('{{ route("checkout.process") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                subtotal: subtotal,
+                ongkir: ongkir,
+                total: total
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.token) {
+                window.snap.pay(data.token, {
+                    onSuccess: function(result){
+                        window.location.href = "{{ route('pesanan-berhasil') }}";
+                    },
+                    onPending: function(result){
+                        alert("Menunggu pembayaran!");
+                    },
+                    onError: function(result){
+                        alert("Pembayaran gagal!");
+                    },
+                    onClose: function(){
+                        alert('Anda menutup popup tanpa menyelesaikan pembayaran');
+                    }
+                });
+            } else {
+                alert('Gagal mendapatkan token: ' + (data.error || 'Unknown Error'));
+                console.error(data);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat memproses pembayaran.');
+        });
+    };
 </script>
 
 </body>

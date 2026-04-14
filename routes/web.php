@@ -54,6 +54,9 @@ Route::get('/checkout', function () {
     return view('checkout');
 })->middleware(['auth'])->name('checkout');
 
+Route::post('/checkout/process', [App\Http\Controllers\OrderController::class, 'process'])
+    ->middleware(['auth'])->name('checkout.process');
+
 Route::get('/chat-penjual', function () {
     return view('chat-penjual');
 })->middleware(['auth'])->name('chat-penjual');
