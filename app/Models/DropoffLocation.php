@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DropoffLocation extends Model
 {
-    protected $table = 'dropoff_locations';
+    // FIX: nama tabel sesuai migration (ayune_dropoff_locations, bukan dropoff_locations)
+    protected $table = 'ayune_dropoff_locations';
 
     protected $fillable = [
         'nama_lokasi',
@@ -17,17 +18,17 @@ class DropoffLocation extends Model
         'foto_lokasi',
         'is_active',
         'latitude',
-        'longitude'
+        'longitude',
     ];
 
     protected $casts = [
         'jenis_kemasan_diterima' => 'array',
-        'is_active' => 'boolean'
+        'is_active'              => 'boolean',
     ];
 
-    //RELASO
-    public function Recyclings(){
+    // RELASI
+    public function recyclings()
+    {
         return $this->hasMany(Recycling::class);
-        //satu lokasi puny bnyk pengajuan daur ulang
     }
 }

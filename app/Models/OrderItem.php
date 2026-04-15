@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
 {
+    // FIX: nama tabel seharusnya ayune_order_items (tanpa _ di akhir)
     protected $table = 'ayune_order_items';
 
     protected $fillable = [
@@ -15,21 +16,19 @@ class OrderItem extends Model
         'harga',
     ];
 
-    //RELASI
-    public function order(){
+    // RELASI
+    public function order()
+    {
         return $this->belongsTo(Order::class);
-        //barang ini punya satu order item pupui masuk ke order #1
     }
 
-    public function product(){
+    public function product()
+    {
         return $this->belongsTo(Product::class);
-        //item ini adalh satu produk cth item A adalah pupui
-        //bisa akses nama, foto desc dll
     }
 
-    public function seller(){
+    public function seller()
+    {
         return $this->belongsTo(User::class, 'seller_id');
-        //item ni di jual  sape?
     }
-
 }

@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     protected $table = 'ayune_orders';
-    //utk tsble ap ne
 
     protected $fillable = [
         'buyer_id',
@@ -20,26 +19,26 @@ class Order extends Model
         'total_bayar',
         'bukti_pembayaran',
         'catatan',
-        'status'
+        'status',
+        'snap_token',        // Token Midtrans Snap
+        'midtrans_order_id', // Order ID yang dikirim ke Midtrans
     ];
-    // kolom ynk cmn blh diisi dr form ntr, kolom products id masukny di order_items
 
-    //RELASI
-    public function buyer(){
+    // RELASI
+    public function buyer()
+    {
         return $this->belongsTo(User::class, 'buyer_id');
-        //cmn dimilikin oleh satu pembeliy
-        //buyer id krn di order ada 2 user
     }
 
-    public function seller(){
+    public function seller()
+    {
         return $this->belongsTo(User::class, 'seller_id');
-        //cmmn dikilikin sm satu penjual
-        //ngasi tau lrvel kl mke sleer kl manual ntr gedebak gebebuk servernya
     }
 
-    public function orderItems(){
-        return $this->belongsTo(OrderItem::class);
-        //pesanan ini cmn untuk satu produk kan tiap pesanan punya nomro unikny masing"
+    public function orderItems()
+    {
+        // FIX: harusnya hasMany bukan belongsTo
+        // Satu order punya banyak item
+        return $this->hasMany(OrderItem::class);
     }
-    
 }

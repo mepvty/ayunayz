@@ -130,61 +130,77 @@
     <!-- SEMUA -->
     <div id="tSemua">
 
-        <div class="order-card" data-status="dikirim">
-            <div class="order-thumb">Product<br>Thumb</div>
-            <div class="order-info">
-                <div class="order-name">5X Ceramide Barrier Repair</div>
-                <div class="order-date">5 Mar 2026</div>
-                <div class="order-price">Rp 110.000</div>
-                <div class="order-actions">
-                    <a href="{{ route('lacak-pesanan') }}" class="btn-lacak" style="text-decoration:none;">Lacak Pesanan</a>
-                    <a href="{{ route('detail-pesanan') }}" class="btn-detail" style="text-decoration:none;">Lihat Detail</a>
-                </div>
-            </div>
-            <div class="order-status"><span class="status-badge status-dikirim">Dikirim</span></div>
-        </div>
+        @forelse ($orders as $order)
+            @php
+                $statusMap = [
+                    'menunggu_pembayaran' => 'belum',
+                    'dibayar'             => 'diproses',
+                    'diproses'            => 'diproses',
+                    'dikirim'             => 'dikirim',
+                    'selesai'             => 'selesai',
+                    'dibatalkan'          => 'dibatalkan',
+                ];
+                $dataStatus  = $statusMap[$order->status] ?? 'belum';
 
-        <div class="order-card" data-status="diproses">
-            <div class="order-thumb">Product<br>Thumb</div>
-            <div class="order-info">
-                <div class="order-name">Holyshield Sunscreen</div>
-                <div class="order-date">3 Mar 2026</div>
-                <div class="order-price">Rp 90.000</div>
-                <div class="order-actions">
-                    <button class="btn-lacak">Lacak Pesanan</button>
-                    <button class="btn-detail">Lihat Detail</button>
-                </div>
-            </div>
-            <div class="order-status"><span class="status-badge status-diproses">Diproses</span></div>
-        </div>
+                $badgeClass  = [
+                    'menunggu_pembayaran' => 'status-dibayar',
+                    'dibayar'             => 'status-diproses',
+                    'diproses'            => 'status-diproses',
+                    'dikirim'             => 'status-dikirim',
+                    'selesai'             => 'status-selesai',
+                    'dibatalkan'          => 'status-batal',
+                ][$order->status] ?? 'status-dibayar';
 
-        <div class="order-card" data-status="selesai">
-            <div class="order-thumb">Product<br>Thumb</div>
-            <div class="order-info">
-                <div class="order-name">Brightening Face Toner</div>
-                <div class="order-date">1 Mar 2026</div>
-                <div class="order-price">Rp 60.000</div>
-                <div class="order-actions">
-                    <button class="btn-lacak">Lacak Pesanan</button>
-                    <button class="btn-detail">Lihat Detail</button>
-                </div>
-            </div>
-            <div class="order-status"><span class="status-badge status-selesai">Selesai</span></div>
-        </div>
+                $badgeLabel  = [
+                    'menunggu_pembayaran' => 'Belum Dibayar',
+                    'dibayar'             => 'Dibayar',
+                    'diproses'            => 'Diproses',
+                    'dikirim'             => 'Dikirim',
+                    'selesai'             => 'Selesai',
+                    'dibatalkan'          => 'Dibatalkan',
+                ][$order->status] ?? ucfirst($order->status);
 
-        <div class="order-card" data-status="belum">
-            <div class="order-thumb">Product<br>Thumb</div>
-            <div class="order-info">
-                <div class="order-name">Moisturizer SPF 30</div>
-                <div class="order-date">28 Feb 2026</div>
-                <div class="order-price">Rp 75.000</div>
-                <div class="order-actions">
-                    <button class="btn-lacak">Lacak Pesanan</button>
-                    <button class="btn-detail">Lihat Detail</button>
+                $firstItem   = $order->orderItems->first();
+                $productName = $firstItem?->product?->nama_produk ?? 'Produk';
+                $extraCount  = $order->orderItems->count() - 1;
+            @endphp
+
+            <div class="order-card" data-status="{{ $dataStatus }}">
+                <div class="order-thumb">
+                    @if ($firstItem?->product?->gambar)
+                        <img src="{{ asset('storage/' . $firstItem->product->gambar) }}"
+                             alt="{{ $productName }}"
+                             style="width:80px;height:80px;object-fit:cover;border-radius:12px;">
+                    @else
+                        Product<br>Thumb
+                    @endif
+                </div>
+                <div class="order-info">
+                    <div class="order-name">
+                        {{ $productName }}
+                        @if ($extraCount > 0)
+                            <span style="font-size:12px;color:#b4a0a0;font-weight:500;">+{{ $extraCount }} produk lainnya</span>
+                        @endif
+                    </div>
+                    <div class="order-date">{{ $order->created_at->translatedFormat('j M Y') }}</div>
+                    <div class="order-price">Rp {{ number_format($order->total_bayar, 0, ',', '.') }}</div>
+                    <div class="order-actions">
+                        <a href="{{ route('lacak-pesanan') }}" class="btn-lacak" style="text-decoration:none;">Lacak Pesanan</a>
+                        <a href="{{ route('detail-pesanan', $order->id) }}" class="btn-detail" style="text-decoration:none;">Lihat Detail</a>
+                    </div>
+                </div>
+                <div class="order-status">
+                    <span class="status-badge {{ $badgeClass }}">{{ $badgeLabel }}</span>
                 </div>
             </div>
-            <div class="order-status"><span class="status-badge status-dibayar">Belum Dibayar</span></div>
-        </div>
+        @empty
+            <div style="text-align:center;padding:60px 0;color:#b4a0a0;">
+                <div style="font-size:48px;margin-bottom:16px;">🛍️</div>
+                <div style="font-size:16px;font-weight:600;">Belum ada pesanan</div>
+                <div style="font-size:13px;margin-top:8px;">Yuk mulai belanja produk perawatan favoritmu!</div>
+                <a href="{{ route('ayu-belanja') }}" style="display:inline-block;margin-top:20px;padding:10px 28px;background:#f4a0aa;color:white;border-radius:50px;text-decoration:none;font-weight:600;font-size:14px;">Mulai Belanja</a>
+            </div>
+        @endforelse
 
     </div>
 </div>
